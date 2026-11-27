@@ -87,7 +87,7 @@ def shap_values(_M, task_name, x_tuple):
     sv = explainer.shap_values(X, nsamples=60, silent=True)
     return np.array(sv).flatten(), explainer.expected_value
 
-def shap_bar_group(pairs, title):
+def shap_bar_group(pairs):
     """pairs: [(变量组名, 组内SHAP值之和)], 按|贡献|排序横条图"""
     pairs = sorted(pairs, key=lambda t: -abs(t[1]))
     labels = [p[0] for p in pairs][::-1]
@@ -96,10 +96,9 @@ def shap_bar_group(pairs, title):
     fig = go.Figure(go.Bar(x=vals, y=labels, orientation='h',
                            marker_color=colors,
                            text=[f'{v:+.2f}' for v in vals], textposition='outside'))
-    fig.update_layout(title=dict(text=title, font_size=15),
-                      xaxis_title='SHAP值（对该患者预测的贡献）',
+    fig.update_layout(xaxis_title='SHAP值',
                       height=max(200, 130 + 45 * len(pairs)),
-                      margin=dict(l=10, r=30, t=40, b=10),
+                      margin=dict(l=10, r=30, t=20, b=10),
                       plot_bgcolor='white')
     fig.update_xaxes(zeroline=True, zerolinecolor='#999')
     return fig
@@ -138,7 +137,7 @@ def main():
         dor = st.radio('卵巢储备减退', ['否', '是', '未提供'], horizontal=True)
         plan = st.selectbox('促排方案', ['拮抗剂方案', '温和刺激方案', 'PPOS方案', '自然周期方案', '未提供'])
         fert = st.selectbox('受精方式', ['常规IVF', 'ICSI', '补救/混合受精', '未提供'])
-        run = st.button('🔮 开始预测', type='primary', use_container_width=True)
+        run = st.button('开始预测', type='primary', use_container_width=True)
 
     if not run:
         return
@@ -182,14 +181,12 @@ def main():
     bA = T['分箱A']['bounds']; bB = T['分箱B']['bounds']
     binA = int(np.clip(np.digitize(pr_A, bA), 0, 6))
     binB = int(np.clip(np.digitize(pr_B, bB), 0, 5))
-    q = T['获卵数回归']['resid_q']
-    lo, hi = pr_reg + q[0], pr_reg + q[4]
     tL, tH = T['LOR分类']['threshold'], T['HOR分类']['threshold']
 
     # ---------- 结果卡片 ----------
     st.subheader('预测结果')
     c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric('预测获卵数', f'{pr_reg:.1f} 枚', f'90%区间 {max(lo,0):.1f}–{hi:.1f} 枚')
+    c1.metric('预测获卵数', f'{pr_reg:.1f} 枚')
     c2.metric('分箱A档级（7档）', f'第{binA+1}档', BIN_A_LBL[binA])
     c3.metric('分箱B档级（6档）', f'第{binB+1}档', BIN_B_LBL[binB])
     c4.metric('低反应风险（<4枚）', f'{pr_L*100:.1f}%', '高风险' if pr_L >= tL else '低风险',
@@ -206,11 +203,8 @@ def main():
                    ('受精方式', ['D_受精_ICSI', 'D_受精_补救混合'])]
     tabs = st.tabs(['获卵数回归', '分箱A', '分箱B', '低反应分类', '高反应分类'])
     x_tuple = tuple(X.flatten().tolist())
-    for tab, tname, ttl in [(tabs[0], '获卵数回归', '各特征对获卵数预测值的贡献（枚）'),
-                            (tabs[1], '分箱A', '各特征对分箱A档级评分的贡献'),
-                            (tabs[2], '分箱B', '各特征对分箱B档级评分的贡献'),
-                            (tabs[3], 'LOR分类', '各特征对低反应预测的贡献（logit）'),
-                            (tabs[4], 'HOR分类', '各特征对高反应预测的贡献（logit）')]:
+    for tab, tname in [(tabs[0], '获卵数回归'), (tabs[1], '分箱A'), (tabs[2], '分箱B'),
+                       (tabs[3], 'LOR分类'), (tabs[4], 'HOR分类')]:
         with tab:
             pairs = []
             for gname, cols in FEAT_GROUPS:
@@ -222,7 +216,7 @@ def main():
             with st.spinner('SHAP计算中（约10秒）…'):
                 sv, ev = shap_values(M, tname, x_tuple)
             gpairs = [(gname, float(sum(sv[i] for i in idx))) for gname, idx in pairs]
-            st.plotly_chart(shap_bar_group(gpairs, ttl), use_container_width=True)
+            st.plotly_chart(shap_bar_group(gpairs), use_container_width=True)
             st.caption('红色=推高预测，蓝色=拉低预测。')
 
 if __name__ == '__main__':
