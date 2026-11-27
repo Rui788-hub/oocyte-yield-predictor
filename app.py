@@ -139,8 +139,6 @@ def main():
         plan = st.selectbox('促排方案', ['未提供', '拮抗剂方案', '温和刺激方案', 'PPOS方案', '自然周期方案'])
         fert = st.selectbox('受精方式', ['未提供', '常规IVF', 'ICSI', '补救/混合受精'])
         run = st.button('🔮 开始预测', type='primary', use_container_width=True)
-        st.divider()
-        st.caption(f"模型版本 {meta['version']} · 训练队列 n={meta['cohort_n']:,} · {meta['trained_at']}")
 
     if not run:
         return
@@ -206,11 +204,13 @@ def main():
                    ('卵巢储备减退', ['D_储备减退']),
                    ('促排方案', ['D_方案_温和刺激', 'D_方案_PPOS', 'D_方案_自然周期']),
                    ('受精方式', ['D_受精_ICSI', 'D_受精_补救混合'])]
-    tabs = st.tabs(['获卵数回归', '低反应分类', '高反应分类'])
+    tabs = st.tabs(['获卵数回归', '分箱A', '分箱B', '低反应分类', '高反应分类'])
     x_tuple = tuple(X.flatten().tolist())
     for tab, tname, ttl in [(tabs[0], '获卵数回归', '各特征对获卵数预测值的贡献（枚）'),
-                            (tabs[1], 'LOR分类', '各特征对低反应预测的贡献（logit）'),
-                            (tabs[2], 'HOR分类', '各特征对高反应预测的贡献（logit）')]:
+                            (tabs[1], '分箱A', '各特征对分箱A档级评分的贡献'),
+                            (tabs[2], '分箱B', '各特征对分箱B档级评分的贡献'),
+                            (tabs[3], 'LOR分类', '各特征对低反应预测的贡献（logit）'),
+                            (tabs[4], 'HOR分类', '各特征对高反应预测的贡献（logit）')]:
         with tab:
             pairs = []
             for gname, cols in FEAT_GROUPS:
