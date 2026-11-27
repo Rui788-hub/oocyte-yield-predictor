@@ -129,15 +129,15 @@ def main():
     with st.sidebar:
         st.header('患者参数输入')
         med = meta['medians']
-        age = st.number_input('年龄（岁）', 20.0, 45.0, None, 1.0, placeholder='未提供')
-        amh = st.number_input('AMH（ng/mL）', 0.0, 20.0, None, 0.1, format='%.2f', placeholder='未提供')
-        fsh = st.number_input('FSH（IU/L）', 0.5, 40.0, None, 0.1, format='%.2f', placeholder='未提供')
-        lh = st.number_input('LH（IU/L）', 0.5, 40.0, None, 0.1, format='%.2f', placeholder='未提供')
-        gn = st.number_input('促性腺激素启动总天数（d）', 1.0, 30.0, None, 1.0, placeholder='未提供')
-        plt_ = st.number_input('血小板计数（×10⁹/L）', 50.0, 600.0, None, 1.0, placeholder='未提供')
-        dor = st.radio('卵巢储备减退', ['未提供', '否', '是'], horizontal=True)
-        plan = st.selectbox('促排方案', ['未提供', '拮抗剂方案', '温和刺激方案', 'PPOS方案', '自然周期方案'])
-        fert = st.selectbox('受精方式', ['未提供', '常规IVF', 'ICSI', '补救/混合受精'])
+        age = st.number_input('年龄（岁）', 20.0, 45.0, float(med['年龄']), 1.0, placeholder='未提供')
+        amh = st.number_input('AMH（ng/mL）', 0.0, 20.0, float(med['AMH']), 0.1, format='%.2f', placeholder='未提供')
+        fsh = st.number_input('FSH（IU/L）', 0.5, 40.0, float(med['FSH']), 0.1, format='%.2f', placeholder='未提供')
+        lh = st.number_input('LH（IU/L）', 0.5, 40.0, float(med['LH']), 0.1, format='%.2f', placeholder='未提供')
+        gn = st.number_input('促性腺激素启动总天数（d）', 1.0, 30.0, float(med['(Gn启动)总天数']), 1.0, placeholder='未提供')
+        plt_ = st.number_input('血小板计数（×10⁹/L）', 50.0, 600.0, float(med['血小板计数']), 1.0, placeholder='未提供')
+        dor = st.radio('卵巢储备减退', ['否', '是', '未提供'], horizontal=True)
+        plan = st.selectbox('促排方案', ['拮抗剂方案', '温和刺激方案', 'PPOS方案', '自然周期方案', '未提供'])
+        fert = st.selectbox('受精方式', ['常规IVF', 'ICSI', '补救/混合受精', '未提供'])
         run = st.button('🔮 开始预测', type='primary', use_container_width=True)
 
     if not run:
