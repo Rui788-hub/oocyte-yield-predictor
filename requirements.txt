@@ -6,6 +6,6 @@ scikit-learn==1.4.2
 xgboost==3.4.1
 lightgbm==4.3.0
 catboost==1.2.10
-shap==0.52.0
+shap==0.46.0
 plotly==5.22.0
 scipy==1.14.1
